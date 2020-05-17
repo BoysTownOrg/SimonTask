@@ -9,6 +9,7 @@ int currentLengthOfTheSentence = 0;
 int wrongCount = 0;
 
 int talkTime = 420;
+int playerToneTime = 420;
 
 int timeOut = 0;
 
@@ -88,10 +89,10 @@ void mousePressed() {
         currentButton.isLightOn = true;
 
         if (simonSentence[positionInSentence] != currentButton.myId) {//wrong
-          simonTones.playTone(4, 420);
+          simonTones.playTone(4, playerToneTime);
           wrongCount++;
         } else {
-          simonTones.playTone(currentButton.myId, 420);
+          simonTones.playTone(currentButton.myId, playerToneTime);
         }
       }
     }
@@ -103,8 +104,8 @@ void mouseReleased() {
 
   if (isSimonsTurn == false) {
 
-    simonTones.stopTone();
-    setButtonLightsOff();
+    //simonTones.stopTone();
+    //setButtonLightsOff();
 
     if (positionInSentence < currentLengthOfTheSentence) {
       positionInSentence++; 

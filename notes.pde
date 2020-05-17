@@ -37,5 +37,6 @@
           - isWrong not enabled for wrong answer
           - remove isWrong; increment wrongCount for wrong response at given position
           - don't increment currentLengthOfTheSentence if wrongCount > 0; reset per turn
-    
+          - cosmetic - make tones the same length (give player tones and flash a constant length)
+          ** note that each position is judged independently, regardly of previous mistakes on that turn **
 */
