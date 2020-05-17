@@ -34,5 +34,7 @@
     1. Use a done button to indicate your turn is over
       - two aspects: continue clicks. click to change turn
         -extend clicks
+          - isWrong not enabled for wrong answer
+          - remove isWrong; increment wrongCount for wrong response at given position
     
 */

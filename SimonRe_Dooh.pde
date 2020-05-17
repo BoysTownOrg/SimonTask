@@ -6,14 +6,13 @@ SimonToneGenerator simonTones;
 int [] simonSentence = new int[32];
 int positionInSentence = 0;
 int currentLengthOfTheSentence = 0;
+int wrongCount = 0;
 
 int talkTime = 420;
 
 int timeOut = 0;
 
 boolean isSimonsTurn = true;
-
-boolean isWrong = false;
 
 void setup() {
   size(600, 600);
@@ -90,7 +89,7 @@ void mousePressed() {
 
         if (simonSentence[positionInSentence] != currentButton.myId) {//wrong
           simonTones.playTone(4, 420);
-          //isWrong = true;
+          wrongCount++;
         } else {
           simonTones.playTone(currentButton.myId, 420);
         }
@@ -107,32 +106,26 @@ void mouseReleased() {
     simonTones.stopTone();
     setButtonLightsOff();
 
-    if (isWrong) {
-      simonStartsNewGame();
-      isWrong = false;
-    } else {
+    if (positionInSentence < currentLengthOfTheSentence) {
+      positionInSentence++; 
+      //println(positionInSentence);
+    } else {  //positionInSentence >= currentLengthOfTheSentence
+      boolean gameOver = currentLengthOfTheSentence == simonSentence.length-1;
+      if (gameOver) {
+        println("user wins!!!"); 
+        simonStartsNewGame();
+      } else {
 
-      if (positionInSentence < currentLengthOfTheSentence) {
-        positionInSentence++; 
-        //println(positionInSentence);
-      } else {  //positionInSentence >= currentLengthOfTheSentence
-        boolean gameOver = currentLengthOfTheSentence == simonSentence.length-1;
-        if (gameOver) {
-          println("user wins!!!"); 
-          simonStartsNewGame();
-        } else {
+        currentLengthOfTheSentence++;
 
-          currentLengthOfTheSentence++;
+        if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
+        else if (currentLengthOfTheSentence < 14) talkTime = 320;
+        else                                     talkTime = 220;
 
-          if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
-          else if (currentLengthOfTheSentence < 14) talkTime = 320;
-          else                                     talkTime = 220;
+        positionInSentence = 0;
 
-          positionInSentence = 0;
-
-          timeOut = millis() + 1000;
-          isSimonsTurn = true;
-        }
+        timeOut = millis() + 1000;
+        isSimonsTurn = true;
       }
     }
   }
@@ -148,6 +141,7 @@ void setButtonLightsOff() {
 void simonStartsNewGame() {
 
   makeNewSentence();
+  wrongCount = 0;
   timeOut = millis() + 1000;
   isSimonsTurn = true;
 }
