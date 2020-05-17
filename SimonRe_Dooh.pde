@@ -115,10 +115,11 @@ void mouseReleased() {
         println("user wins!!!"); 
         simonStartsNewGame();
       } else {
-
-        currentLengthOfTheSentence++;
-
-        if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
+        if (wrongCount == 0) {
+          currentLengthOfTheSentence++;
+        }
+        wrongCount = 0;//each trun starts you over
+          if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
         else if (currentLengthOfTheSentence < 14) talkTime = 320;
         else                                     talkTime = 220;
 
