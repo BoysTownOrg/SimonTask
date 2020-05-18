@@ -17,9 +17,9 @@ class SimonToneGenerator {
     wave.amp(0.0);
   }
   
-  void playTone(int index, int toneDuration) {
+  void playTone(int index, int toneDuration, float amp) {
     
-    wave.amp(0.6);  
+    wave.amp(amp);  
     wave.freq(simonTones[index]);
     
     toneStopTime = millis() + toneDuration;
