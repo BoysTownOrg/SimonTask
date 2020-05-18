@@ -26,12 +26,14 @@ boolean isRandom;
 int runNum = 0;
 int trialCount = 0;
 int maxRun = 4;
+String[] colorAssign = {"", "", "", ""};
 
 boolean isSimonsTurn = true;
 boolean lastClick = true;
 int [] runtype = new int[4];
 int [] runlength = new int[4];
-
+Table table;
+int rowCount = 0;
 void setup() {
   fullScreen();
   background(bgcolor);
@@ -52,13 +54,22 @@ void setup() {
   for (int i = 0; i < colorsstart.length; i++) {
     index = colorscrambler.get(i);
     colors[i] = colorsstart[index];
+    colorAssign[i] = hex(colors[i], 6);
   }
+  saveStrings("colors.txt", colorAssign);
   doneButton = new DoneButton(1, width*6/8, height*6/8, width/8, height/8);
   buttons[0] = new Button(0, width/2, height/4, circSize, colors[0]);
   buttons[1] = new Button(1, width/4, height/2, circSize, colors[1]);
   buttons[2] = new Button(2, width*3/4, height/2, circSize, colors[2]);
   buttons[3] = new Button(3, width/2, height*3/4, circSize, colors[3]);
 
+  table = new Table();
+  table.addColumn("runNum");
+  table.addColumn("position");
+  table.addColumn("circleNum");
+  table.addColumn("source");
+  table.addColumn("isRandom");
+  table.addColumn("time");
 
   textAlign(CENTER, CENTER);
 
@@ -67,9 +78,12 @@ void setup() {
 
   textSize(40);
   textAlign(CENTER, CENTER);
+  
+  makeNewSentence();
+  arrayCopy(simonSentence, simonSentenceSave);
+    println(join(nf(simonSentenceSave, 0), ", "));
 
   simonStartsNewGame(isRandom);
-  arrayCopy(simonSentence, simonSentenceSave);
 }
 
 void draw() {
@@ -107,6 +121,13 @@ void simonSays() {
   if (millis() >= timeOut) {
 
     int simonsWord = simonSentence[positionInSentence];
+    table.setFloat(rowCount, "time", millis());
+    table.setInt(rowCount, "runNum", runNum);
+    table.setInt(rowCount, "position", positionInSentence);
+    table.setInt(rowCount, "circleNum", simonsWord);
+    table.setInt(rowCount, "source", 1);  //1 = Simon
+    table.setInt(rowCount, "isRandom", runtype[runNum]);
+    rowCount++;
     println(str(simonsWord));
     simonTones.playTone(simonsWord, talkTime, myAmp);
     buttons[simonsWord].isLightOn = true;
@@ -135,6 +156,14 @@ void mousePressed() {
       for (Button currentButton : buttons) {
         if (currentButton.isMouseOver() == true) {
           currentButton.isLightOn = true;
+          table.setFloat(rowCount, "time", millis());
+          table.setInt(rowCount, "runNum", runNum);
+          table.setInt(rowCount, "position", positionInSentence);
+          table.setInt(rowCount, "circleNum", currentButton.myId);
+          table.setInt(rowCount, "source", 0);  //0 = player
+          table.setInt(rowCount, "isRandom", runtype[runNum]);
+          rowCount++;
+
           println(str(currentButton.myId));
           if (simonSentence[positionInSentence] != currentButton.myId) {//wrong
             simonTones.playTone(4, playerToneTime, myAmp);
@@ -220,4 +249,18 @@ void makeNewSentence() {
 
   positionInSentence = 0;
   println(join(nf(simonSentence, 0), ", "));
+}
+
+void exit() {
+  //it's over, baby
+  String monthS = String.valueOf(month());
+  String dayS = String.valueOf(day());
+  String hourS = String.valueOf(hour());
+  String minuteS = String.valueOf(minute());
+  String myfilename = "Simon"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
+  saveTable(table, myfilename, "csv");
+  myfilename = "Colors"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
+  saveStrings(myfilename, colorAssign);
+  //println("exiting");
+  super.exit();
 }
