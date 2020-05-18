@@ -41,4 +41,6 @@
           ** note that each position is judged independently, regardly of previous mistakes on that turn **
           - make Simon default be background, player default be bright
      **status - wrongly changes immediately to Simon mode after last user click, but heading for done button with circular targets**
+     basic sequence works
+     goal: switch between random and constant
 */

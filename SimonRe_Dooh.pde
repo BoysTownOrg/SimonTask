@@ -4,32 +4,48 @@ Button [] buttons = new Button[4];
 DoneButton doneButton;
 
 SimonToneGenerator simonTones;
-float myAmp=0.6;
+float myAmp=0.0;
 color [] colorsstart = {#00ff00, #ff0000, #ffff00, #0000ff}, colors = new color[4]; 
 int bgcolor = 255; //black = 0, 128 gray, 255 white; 
 IntList colorscrambler = new IntList();
 int index;
 
 int [] simonSentence = new int[32];
+int [] simonSentenceSave = new int[32];
 int positionInSentence = 0;
-int currentLengthOfTheSentence = 1;
+int currentLengthOfTheSentence = 0;
 int wrongCount = 0;
 int clickCount = 0;
-int talkTime = 420;
-int playerToneTime = 420;
+int talkTime = 700;
+int playerToneTime = 100;
+int hideTime = 700;
 int nextTurnTime = 0;
 int timeOut = 0;
 int circSize = 300;
+boolean isRandom;
+int runNum = 0;
+int trialCount = 0;
+int maxRun = 4;
 
 boolean isSimonsTurn = true;
 boolean lastClick = true;
+int [] runtype = new int[4];
+int [] runlength = new int[4];
 
 void setup() {
   fullScreen();
   background(bgcolor);
-
+  String[] lines = loadStrings("parameters.txt");
+  String[] list;
+  for (int i = 0; i < lines.length; i++) {
+    list = split(lines[i], " ");
+    runtype[i] = int(list[0]);
+    runlength[i] = int(list[1]);
+    println(str(runtype[i])+" "+str(runlength[i]));
+  }
+  maxRun = lines.length;
   textSize(40);
-
+  isRandom = runtype[runNum]==1;
   strokeWeight(4);
   colorscrambler.append(new int[] {0, 1, 2, 3});
   colorscrambler.shuffle();
@@ -52,11 +68,12 @@ void setup() {
   textSize(40);
   textAlign(CENTER, CENTER);
 
-  simonStartsNewGame();
+  simonStartsNewGame(isRandom);
+  arrayCopy(simonSentence, simonSentenceSave);
 }
 
 void draw() {
-
+  background(bgcolor);
   simonTones.checkPlayTime();
 
   if (simonTones.isPlayingTone == false) setButtonLightsOff();
@@ -65,6 +82,7 @@ void draw() {
   int buttonCount = 0;
   for (Button currentButton : buttons) {
     if (isSimonsTurn) {
+      doneButton.isDisplayed = false;
       currentButton.myDarkColor = color(255);
       currentButton.myColor = currentButton.myDefaultColor;
     } else {
@@ -80,16 +98,8 @@ void draw() {
     }
     currentButton.display();
   }
-
   doneButton.display();
   fill(255);
-
-  //if (isSimonsTurn) {
-  //  if (currentLengthOfTheSentence == 0) text("Simon Starts", width/2, height/2); 
-  //  else                                text("Simons Turn", width/2, height/2);
-  //} else {
-  //  text("Your Turn", width/2, height/2);
-  //}
 }
 
 void simonSays() {
@@ -97,17 +107,18 @@ void simonSays() {
   if (millis() >= timeOut) {
 
     int simonsWord = simonSentence[positionInSentence];
+    println(str(simonsWord));
     simonTones.playTone(simonsWord, talkTime, myAmp);
     buttons[simonsWord].isLightOn = true;
     if (positionInSentence < currentLengthOfTheSentence) {
       positionInSentence++;
     } else {
-      nextTurnTime = millis() + talkTime + 1000;
+      nextTurnTime = millis() + talkTime + hideTime;
       isSimonsTurn = false;
       positionInSentence = 0;
     }
 
-    timeOut = millis() + talkTime + 1000;
+    timeOut = millis() + talkTime + hideTime;
   }
 }
 
@@ -117,19 +128,17 @@ void mousePressed() {
   if (doneButton.isMouseOver() == true) {
     doneButton.isDisplayed = false;
     isSimonsTurn = true;
-    timeOut = millis() + talkTime + 1000;
+    timeOut = millis() + talkTime + hideTime;
   } else { //a target button is pressed
     if (isSimonsTurn == false) { //only check clicks during player's turn
       clickCount++;
       for (Button currentButton : buttons) {
         if (currentButton.isMouseOver() == true) {
-
           currentButton.isLightOn = true;
-
+          println(str(currentButton.myId));
           if (simonSentence[positionInSentence] != currentButton.myId) {//wrong
             simonTones.playTone(4, playerToneTime, myAmp);
             wrongCount++;
-            println("Inc wrongCount");
           } else {
             simonTones.playTone(currentButton.myId, playerToneTime, myAmp);
           }
@@ -142,10 +151,26 @@ void mousePressed() {
 void mouseReleased() {
   //println("released!");
   if (doneButton.isMouseOver() == true) {
-    println(str(clickCount)+ " " + str(currentLengthOfTheSentence));
     if ((wrongCount == 0) && (clickCount - 1 == currentLengthOfTheSentence)) {
       currentLengthOfTheSentence++;
-      println("inc currentLengthOfTheSentence");
+    } else {
+      currentLengthOfTheSentence--;
+      if (currentLengthOfTheSentence < 0)
+        currentLengthOfTheSentence = 0;
+    }
+    trialCount++;
+    if (trialCount==runlength[runNum]) {
+      runNum++;
+      if (runNum==maxRun) {
+        exit();
+      }
+      isRandom = runtype[runNum]==1;
+      trialCount = 0;
+    }
+    if (isRandom) {
+      makeNewSentence();
+    } else {
+      arrayCopy(simonSentenceSave, simonSentence);
     }
     wrongCount = 0;//each trun starts you over
     clickCount = 0;
@@ -153,7 +178,7 @@ void mouseReleased() {
     println("LastClick");
     positionInSentence = 0;
 
-    timeOut = millis() + talkTime + 1000;
+    timeOut = millis() + talkTime + hideTime;
   } else {
     if (isSimonsTurn == false) {
 
@@ -163,7 +188,7 @@ void mouseReleased() {
         boolean gameOver = currentLengthOfTheSentence == simonSentence.length-1;
         if (gameOver) {
           println("user wins!!!"); 
-          simonStartsNewGame();
+          simonStartsNewGame(isRandom);
         }
       }
     }
@@ -177,9 +202,12 @@ void setButtonLightsOff() {
   }
 }
 
-void simonStartsNewGame() {
-
-  makeNewSentence();
+void simonStartsNewGame(boolean isRandom) {
+  if (isRandom) {
+    makeNewSentence();
+  } else {
+    arrayCopy(simonSentenceSave, simonSentence);
+  }
   wrongCount = 0;
   timeOut = millis() + 1000;
   isSimonsTurn = true;
@@ -191,7 +219,5 @@ void makeNewSentence() {
   }
 
   positionInSentence = 0;
-  currentLengthOfTheSentence = 1;
-
   println(join(nf(simonSentence, 0), ", "));
 }
