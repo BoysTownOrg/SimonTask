@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream; 
 import java.io.IOException; 
 
-public class SimonRe_Dooh extends PApplet {
+public class SimonTask extends PApplet {
 
 
 Button [] buttons = new Button[4];
@@ -462,7 +462,7 @@ class SimonToneGenerator {
 */
   public void settings() {  fullScreen(); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "SimonRe_Dooh" };
+    String[] appletArgs = new String[] { "SimonTask" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {
