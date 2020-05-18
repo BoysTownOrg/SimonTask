@@ -39,4 +39,6 @@
           - don't increment currentLengthOfTheSentence if wrongCount > 0; reset per turn
           - cosmetic - make tones the same length (give player tones and flash a constant length)
           ** note that each position is judged independently, regardly of previous mistakes on that turn **
+          - make Simon default be background, player default be bright
+     **status - wrongly changes immediately to Simon mode after last user click, but heading for done button with circular targets**
 */

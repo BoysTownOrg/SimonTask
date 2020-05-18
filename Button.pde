@@ -8,7 +8,7 @@ class Button {
   
   color myColor;
   color myDarkColor;
-  
+  color myDefaultColor;
   boolean isLightOn = false;
   
   Button(int tempId, float tempX, float tempY, float tempSize, color tempColor) {
@@ -17,8 +17,8 @@ class Button {
     myY = tempY;
     mySize = tempSize;
     myColor = tempColor;
-    
-    myDarkColor = lerpColor(0, myColor, 0.5);
+    myDefaultColor = myColor;
+    myDarkColor = color(255); //lerpColor(0, myColor, 0.5);
   }
   
   void display() {

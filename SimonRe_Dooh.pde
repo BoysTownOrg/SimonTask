@@ -10,10 +10,11 @@ int wrongCount = 0;
 
 int talkTime = 420;
 int playerToneTime = 420;
-
+int nextTurnTime = 0;
 int timeOut = 0;
 
 boolean isSimonsTurn = true;
+boolean lastClick = true;
 
 void setup() {
   size(600, 600);
@@ -38,10 +39,28 @@ void draw() {
   if (simonTones.isPlayingTone == false) setButtonLightsOff();
 
   if (isSimonsTurn) simonSays();
-
+  int buttonCount = 0;
   for (Button currentButton : buttons) {
+    if (isSimonsTurn) {
+      currentButton.myDarkColor = color(255);
+      currentButton.myColor = currentButton.myDefaultColor;
+      buttonCount++;
+      if (buttonCount> 3) {
+        lastClick = false;
+      }
+    } else {
+      if (millis() > nextTurnTime) {
+        currentButton.myDarkColor = currentButton.myDefaultColor;
+        currentButton.myColor = color(0);
+        buttonCount++;
+        if (buttonCount> 3) {
+          nextTurnTime = millis()+100000;
+        }
+      }
+    }
     currentButton.display();
   }
+
 
   fill(255);
 
@@ -60,21 +79,15 @@ void simonSays() {
     int simonsWord = simonSentence[positionInSentence];
     simonTones.playTone(simonsWord, talkTime);
     buttons[simonsWord].isLightOn = true;
-
     if (positionInSentence < currentLengthOfTheSentence) {
       positionInSentence++;
     } else {
+      nextTurnTime = millis() + talkTime + 1000;
       isSimonsTurn = false;
       positionInSentence = 0;
     }
 
-    //if(positionInSentence>=simonSentence.length) {
-    //  positionInSentence = 0;    
-    //}
-
-    //println(positionInSentence);
-
-    timeOut = millis() + talkTime + 55;
+    timeOut = millis() + talkTime + 1000;
   }
 }
 
@@ -104,12 +117,8 @@ void mouseReleased() {
 
   if (isSimonsTurn == false) {
 
-    //simonTones.stopTone();
-    //setButtonLightsOff();
-
     if (positionInSentence < currentLengthOfTheSentence) {
       positionInSentence++; 
-      //println(positionInSentence);
     } else {  //positionInSentence >= currentLengthOfTheSentence
       boolean gameOver = currentLengthOfTheSentence == simonSentence.length-1;
       if (gameOver) {
@@ -120,13 +129,14 @@ void mouseReleased() {
           currentLengthOfTheSentence++;
         }
         wrongCount = 0;//each trun starts you over
-          if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
+        lastClick = true;
+        if (currentLengthOfTheSentence <6)        talkTime = 420;  //faster for longer sequences
         else if (currentLengthOfTheSentence < 14) talkTime = 320;
         else                                     talkTime = 220;
 
         positionInSentence = 0;
 
-        timeOut = millis() + 1000;
+        timeOut = millis() + talkTime + 1000;
         isSimonsTurn = true;
       }
     }
@@ -156,6 +166,5 @@ void makeNewSentence() {
   positionInSentence = 0;
   currentLengthOfTheSentence = 0;
 
-  //printArray(simonSentence);
   println(join(nf(simonSentence, 0), ", "));
 }
