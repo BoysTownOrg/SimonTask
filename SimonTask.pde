@@ -1,4 +1,4 @@
-
+ //<>// //<>// //<>// //<>// //<>// //<>//
 Button [] buttons = new Button[4];
 
 DoneButton doneButton;
@@ -16,6 +16,7 @@ int positionInSentence = 0;
 int currentLengthOfTheSentence = 2;
 int wrongCount = 0;
 int clickCount = 0;
+int practiceCount = 0;
 
 int talkTime = 700;
 int sequence = 0;
@@ -99,11 +100,12 @@ void setup() {
   textSize(40);
   textAlign(CENTER, CENTER);
 
-  makeNewSentence();
+  makeNewSentence(0); // these two statments make the fixed sequence
   arrayCopy(simonSentence, simonSentenceSave);
   //println(join(nf(simonSentenceSave, 0), ", "));
+  makeNewSentence(1);
 
-  simonStartsNewGame(isRandom);
+  //simonStartsNewGame(isRandom);
 }
 
 void draw() {
@@ -180,14 +182,11 @@ void mousePressed() {
   if (doneButton.isMouseOver() == true) {
     if (notPractice) {
     } else {
-      if (wrongCount==0) {
+      if ((wrongCount == 0) && (clickCount - 1 == currentLengthOfTheSentence)) {
         instruct = true;
         instructNum++;
-        if (instructNum > 3) {
-          instruct = false;
-          notPractice = true;
-          currentLengthOfTheSentence = 0;
-          println("instructNum > 3");
+        if (instructNum == 2) {
+          makeNewSentence(2);
         }
       }
     }
@@ -244,9 +243,9 @@ void mouseReleased() {
       trialCount = 0;
     }
     if (isRandom) {
-      makeNewSentence();
+      makeNewSentence(0);
     } else {
-      arrayCopy(simonSentenceSave, simonSentence);
+      if (notPractice) arrayCopy(simonSentenceSave, simonSentence);
     }
     wrongCount = 0;//each turn starts you over
     clickCount = 0;
@@ -280,7 +279,7 @@ void setButtonLightsOff() {
 
 void simonStartsNewGame(boolean isRandom) {
   if (isRandom) {
-    makeNewSentence();
+    makeNewSentence(0);
   } else {
     arrayCopy(simonSentenceSave, simonSentence);
   }
@@ -289,15 +288,21 @@ void simonStartsNewGame(boolean isRandom) {
   isSimonsTurn = true;
 }
 
-void makeNewSentence() {
+void makeNewSentence(int predefined) {
   for (int i = 0; i<simonSentence.length; i++) {
     simonSentence[i] = int(random(0, 4));
   }
-  if (!notPractice){
+  if (predefined==1) {
     simonSentence[0] = 0;
     simonSentence[1] = 2;
     simonSentence[2] = 2;
+  };
+  if (predefined==2) {
+    simonSentence[0] = 1;
+    simonSentence[1] = 3;
+    simonSentence[2] = 1;
   }
+
 
   positionInSentence = 0;
   //println(join(nf(simonSentence, 0), ", "));
@@ -306,6 +311,15 @@ void makeNewSentence() {
 void keyPressed() {
   if (key == ' ' ) {
     instruct = false;
+    if (instructNum == 3) {
+      instruct = false;
+      notPractice = true;
+      currentLengthOfTheSentence = 0;
+      setButtonLightsOff();
+      doneButton.isDisplayed = false;
+      isSimonsTurn = true;
+      timeOut = millis() + talkTime + hideTime;
+    }
   }
 }
 
