@@ -17,7 +17,7 @@ int currentLengthOfTheSentence = 2;
 int wrongCount = 0;
 int clickCount = 0;
 int practiceCount = 0;
-
+int numRight=0,numTotal=0;
 int talkTime = 700;
 int sequence = 0;
 int playerToneTime = 100;
@@ -37,7 +37,7 @@ String [] goAhead;
 String circleInstructionsText, doPracticeText, goAheadText;
 
 boolean isSimonsTurn = true, instruct = true, notPractice = false;
-boolean lastClick = true;
+boolean lastClick = true,simonStart=true;
 int [] runtype = new int[maxRun];
 int [] runlength = new int[maxRun];
 Table table;
@@ -85,11 +85,12 @@ void setup() {
   table.addColumn("Block");
   table.addColumn("RowCount");
   table.addColumn("position");
-  table.addColumn("sequence");
   table.addColumn("circleNum");
   table.addColumn("source");
   table.addColumn("isRandom");
   table.addColumn("TrialCount");
+  table.addColumn("numRight");
+  table.addColumn("numTotal");
   table.addColumn("time");
 
   textAlign(CENTER, CENTER);
@@ -150,12 +151,15 @@ void simonSays() {
   if (millis() >= timeOut) {
     int simonsWord = simonSentence[positionInSentence];
     if (notPractice) {
-      sequence++;
+      if (simonStart) {
+        sequence++;
+        simonStart = false;
+      }
       table.setFloat(rowCount, "time", millis());
-      table.setInt(rowCount, "Block", runNum + 1);
+      table.setInt(rowCount, "Block", runNum - 1);
       table.setInt(rowCount, "RowCount", rowCount);
       table.setInt(rowCount, "position", positionInSentence);
-      table.setInt(rowCount, "sequence", sequence);
+      table.setInt(rowCount, "TrialCount", sequence);
       table.setInt(rowCount, "circleNum", simonsWord + 1);
       table.setInt(rowCount, "source", 1);  //1 = Simon
       table.setInt(rowCount, "isRandom", runtype[runNum]);
@@ -181,6 +185,7 @@ void mousePressed() {
 
   if (doneButton.isMouseOver() == true) {
     if (notPractice) {
+      simonStart = true;
     } else {
       if ((wrongCount == 0) && (clickCount - 1 == currentLengthOfTheSentence)) {
         instruct = true;
@@ -201,12 +206,14 @@ void mousePressed() {
           currentButton.isLightOn = true;
           if (notPractice) {
             table.setFloat(rowCount, "time", millis());
-            table.setInt(rowCount, "Block", runNum + 1);
+            table.setInt(rowCount, "Block", runNum - 1);
             table.setInt(rowCount, "RowCount", rowCount);
             table.setInt(rowCount, "position", positionInSentence);
-            table.setInt(rowCount, "sequence", sequence);
+            table.setInt(rowCount, "TrialCount", sequence);
             table.setInt(rowCount, "circleNum", currentButton.myId + 1);
             table.setInt(rowCount, "source", 0);  //0 = player
+            table.setInt(rowCount, "numRight", numRight);  //0 = player
+            table.setInt(rowCount, "numTotal", numTotal);  //0 = player
             table.setInt(rowCount, "isRandom", runtype[runNum]);
             rowCount++;
           }
@@ -214,6 +221,7 @@ void mousePressed() {
             simonTones.playTone(4, playerToneTime, myAmp);
             wrongCount++;
           } else {
+            numRight += 1;
             simonTones.playTone(currentButton.myId, playerToneTime, myAmp);
           }
         }
@@ -226,20 +234,25 @@ void mouseReleased() {
   //println("released!");
   if (doneButton.isMouseOver() == true) {
     if ((wrongCount == 0) && (clickCount - 1 == currentLengthOfTheSentence)) {
-      if (notPractice) currentLengthOfTheSentence++;
+      if (notPractice) {
+        currentLengthOfTheSentence++;
+      }
     } else {
-      if (notPractice) currentLengthOfTheSentence--;
+      if (notPractice) {
+        currentLengthOfTheSentence--;
+      }
       if (currentLengthOfTheSentence < 0)
         currentLengthOfTheSentence = 0;
     }
     trialCount++;
     if (trialCount==runlength[runNum]) {
       runNum++;
+      if (runNum == 2) notPractice = true;
       println(runNum);
       if (runNum==maxRun) {
         exit();
       }
-      isRandom = runtype[runNum]==1;
+      isRandom = runtype[runNum]==1; //<>//
       trialCount = 0;
     }
     if (isRandom) {
@@ -256,7 +269,7 @@ void mouseReleased() {
     timeOut = millis() + talkTime + hideTime;
   } else {
     if (isSimonsTurn == false) {
-
+      numTotal += 1;
       if (positionInSentence < currentLengthOfTheSentence) {
         positionInSentence++;
       } else {  //positionInSentence >= currentLengthOfTheSentence
@@ -317,7 +330,9 @@ void keyPressed() {
       currentLengthOfTheSentence = 0;
       setButtonLightsOff();
       doneButton.isDisplayed = false;
-      isSimonsTurn = true;
+      isSimonsTurn = true; //<>//
+      numRight=0;
+      numTotal=0;
       timeOut = millis() + talkTime + hideTime;
     }
   }
