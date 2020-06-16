@@ -1,5 +1,4 @@
- //<>// //<>// //<>// //<>// //<>// //<>//
-Button [] buttons = new Button[4];
+Button [] buttons = new Button[4]; //<>//
 
 DoneButton doneButton;
 int textsize = 64;
@@ -252,7 +251,7 @@ void mouseReleased() {
       if (runNum==maxRun) {
         exit();
       }
-      isRandom = runtype[runNum]==1; //<>//
+      isRandom = runtype[runNum]==1; //<>// //<>//
       trialCount = 0;
     }
     if (isRandom) {
@@ -330,7 +329,7 @@ void keyPressed() {
       currentLengthOfTheSentence = 0;
       setButtonLightsOff();
       doneButton.isDisplayed = false;
-      isSimonsTurn = true; //<>//
+      isSimonsTurn = true; //<>// //<>//
       numRight=0;
       numTotal=0;
       timeOut = millis() + talkTime + hideTime;
