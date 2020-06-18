@@ -1,5 +1,5 @@
 Button [] buttons = new Button[4]; //<>//
-
+int playerToneTime = 500;
 DoneButton doneButton;
 int textsize = 64;
 SimonToneGenerator simonTones;
@@ -19,7 +19,7 @@ int practiceCount = 0;
 int numRight=0,numTotal=0;
 int talkTime = 700;
 int sequence = 0;
-int playerToneTime = 100;
+
 int hideTime = 700;
 int nextTurnTime = 0;
 int timeOut = 0;
