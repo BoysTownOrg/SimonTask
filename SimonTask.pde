@@ -1,5 +1,5 @@
-Button [] buttons = new Button[4]; //<>//
-int playerToneTime = 500;
+Button [] buttons = new Button[4]; //<>// //<>// //<>//
+int playerToneTime = 100;
 DoneButton doneButton;
 int textsize = 64;
 SimonToneGenerator simonTones;
@@ -15,8 +15,10 @@ int positionInSentence = 0;
 int currentLengthOfTheSentence = 2;
 int wrongCount = 0;
 int clickCount = 0;
+
+int lengthPresented ;
 int practiceCount = 0;
-int numRight=0,numTotal=0;
+
 int talkTime = 700;
 int sequence = 0;
 
@@ -36,7 +38,7 @@ String [] goAhead;
 String circleInstructionsText, doPracticeText, goAheadText;
 
 boolean isSimonsTurn = true, instruct = true, notPractice = false;
-boolean lastClick = true,simonStart=true;
+boolean lastClick = true, simonStart=true;
 int [] runtype = new int[maxRun];
 int [] runlength = new int[maxRun];
 Table table;
@@ -84,12 +86,12 @@ void setup() {
   table.addColumn("Block");
   table.addColumn("RowCount");
   table.addColumn("position");
+  table.addColumn("lengthPresented");
   table.addColumn("circleNum");
+  table.addColumn("correct");
   table.addColumn("source");
   table.addColumn("isRandom");
   table.addColumn("TrialCount");
-  table.addColumn("numRight");
-  table.addColumn("numTotal");
   table.addColumn("time");
 
   textAlign(CENTER, CENTER);
@@ -154,12 +156,15 @@ void simonSays() {
         sequence++;
         simonStart = false;
       }
+      lengthPresented = positionInSentence + 1;
       table.setFloat(rowCount, "time", millis());
       table.setInt(rowCount, "Block", runNum - 1);
-      table.setInt(rowCount, "RowCount", rowCount);
-      table.setInt(rowCount, "position", positionInSentence);
+      table.setInt(rowCount, "RowCount", rowCount + 1);
+      table.setInt(rowCount, "position", positionInSentence + 1);
+      table.setInt(rowCount, "lengthPresented", lengthPresented);
       table.setInt(rowCount, "TrialCount", sequence);
       table.setInt(rowCount, "circleNum", simonsWord + 1);
+      table.setInt(rowCount, "correct", 1);  //1 = Simon
       table.setInt(rowCount, "source", 1);  //1 = Simon
       table.setInt(rowCount, "isRandom", runtype[runNum]);
       rowCount++;
@@ -206,13 +211,17 @@ void mousePressed() {
           if (notPractice) {
             table.setFloat(rowCount, "time", millis());
             table.setInt(rowCount, "Block", runNum - 1);
-            table.setInt(rowCount, "RowCount", rowCount);
-            table.setInt(rowCount, "position", positionInSentence);
+            table.setInt(rowCount, "RowCount", rowCount + 1);
+            table.setInt(rowCount, "position", positionInSentence + 1);
+            table.setInt(rowCount, "lengthPresented", lengthPresented);
             table.setInt(rowCount, "TrialCount", sequence);
             table.setInt(rowCount, "circleNum", currentButton.myId + 1);
+            if ((simonSentence[positionInSentence] == currentButton.myId) && (positionInSentence <= lengthPresented))  {
+              table.setInt(rowCount, "correct", 1);
+            } else {
+              table.setInt(rowCount, "correct", 0);
+            }
             table.setInt(rowCount, "source", 0);  //0 = player
-            table.setInt(rowCount, "numRight", numRight);  //0 = player
-            table.setInt(rowCount, "numTotal", numTotal);  //0 = player
             table.setInt(rowCount, "isRandom", runtype[runNum]);
             rowCount++;
           }
@@ -220,7 +229,6 @@ void mousePressed() {
             simonTones.playTone(4, playerToneTime, myAmp);
             wrongCount++;
           } else {
-            numRight += 1;
             simonTones.playTone(currentButton.myId, playerToneTime, myAmp);
           }
         }
@@ -251,7 +259,7 @@ void mouseReleased() {
       if (runNum==maxRun) {
         exit();
       }
-      isRandom = runtype[runNum]==1; //<>// //<>//
+      isRandom = runtype[runNum]==1; //<>//
       trialCount = 0;
     }
     if (isRandom) {
@@ -268,7 +276,6 @@ void mouseReleased() {
     timeOut = millis() + talkTime + hideTime;
   } else {
     if (isSimonsTurn == false) {
-      numTotal += 1;
       if (positionInSentence < currentLengthOfTheSentence) {
         positionInSentence++;
       } else {  //positionInSentence >= currentLengthOfTheSentence
@@ -329,9 +336,7 @@ void keyPressed() {
       currentLengthOfTheSentence = 0;
       setButtonLightsOff();
       doneButton.isDisplayed = false;
-      isSimonsTurn = true; //<>// //<>//
-      numRight=0;
-      numTotal=0;
+      isSimonsTurn = true; //<>//
       timeOut = millis() + talkTime + hideTime;
     }
   }
