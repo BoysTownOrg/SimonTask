@@ -3,6 +3,7 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import uibooster.*; 
 import processing.sound.*; 
 
 import java.util.HashMap; 
@@ -16,10 +17,14 @@ import java.io.IOException;
 
 public class SimonTask extends PApplet {
 
-Button [] buttons = new Button[4]; //<>// //<>//
+
+UiBooster booster;
+File directory;
+
+Button [] buttons = new Button[4]; //<>//
 int playerToneTime = 100;
 DoneButton doneButton;
-int textsize = 64;
+int textsize = 48;
 SimonToneGenerator simonTones;
 float myAmp=0.0f;
 int [] colorsstart = {0xff00ff00, 0xffff0000, 0xffffff00, 0xff0000ff}, colors = new int[4]; 
@@ -61,12 +66,17 @@ int [] runtype = new int[maxRun];
 int [] runlength = new int[maxRun];
 Table table;
 int rowCount = 0;
+public void settings(){
+  size(displayWidth-5,displayHeight-5);
+}
 public void setup() {
+  //fullScreen();
   
   background(bgcolor);
   textSize(textsize);
   textAlign(CENTER);
   String[] lines = loadStrings("parameters.txt");
+  booster = new UiBooster();
   circleInstructions = loadStrings("CircleInstructions.txt");
   doPractice = loadStrings("DoPractice.txt");
   goAhead = loadStrings("GoAhead.txt");
@@ -367,9 +377,10 @@ public void exit() {
   String hourS = String.valueOf(hour());
   String minuteS = String.valueOf(minute());
   String myfilename = "Simon"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
-  saveTable(table, myfilename, "csv");
-  myfilename = "Colors"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
-  saveStrings(myfilename, colorAssign);
+  directory = booster.showDirectorySelection();
+  saveTable(table, directory.getAbsolutePath() + "/" +myfilename, "csv");
+  myfilename = "SimonColors"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
+  saveStrings(directory.getAbsolutePath() + "/" +myfilename, colorAssign);
   //println("exiting");
   super.exit();
 }
@@ -551,7 +562,6 @@ class SimonToneGenerator {
      basic sequence works
      goal: switch between random and constant
 */
-  public void settings() {  fullScreen(); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "SimonTask" };
     if (passedArgs != null) {

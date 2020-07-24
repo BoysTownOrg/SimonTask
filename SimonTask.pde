@@ -1,7 +1,11 @@
-Button [] buttons = new Button[4]; //<>// //<>// //<>//
+import uibooster.*; //<>//
+UiBooster booster;
+File directory;
+
+Button [] buttons = new Button[4]; //<>// //<>//
 int playerToneTime = 100;
 DoneButton doneButton;
-int textsize = 64;
+int textsize = 48;
 SimonToneGenerator simonTones;
 float myAmp=0.0;
 color [] colorsstart = {#00ff00, #ff0000, #ffff00, #0000ff}, colors = new color[4]; 
@@ -43,12 +47,17 @@ int [] runtype = new int[maxRun];
 int [] runlength = new int[maxRun];
 Table table;
 int rowCount = 0;
+void settings(){
+  size(displayWidth-5,displayHeight-5);
+}
 void setup() {
-  fullScreen();
+  //fullScreen();
+  
   background(bgcolor);
   textSize(textsize);
   textAlign(CENTER);
   String[] lines = loadStrings("parameters.txt");
+  booster = new UiBooster();
   circleInstructions = loadStrings("CircleInstructions.txt");
   doPractice = loadStrings("DoPractice.txt");
   goAhead = loadStrings("GoAhead.txt");
@@ -349,9 +358,10 @@ void exit() {
   String hourS = String.valueOf(hour());
   String minuteS = String.valueOf(minute());
   String myfilename = "Simon"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
-  saveTable(table, myfilename, "csv");
-  myfilename = "Colors"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
-  saveStrings(myfilename, colorAssign);
+  directory = booster.showDirectorySelection();
+  saveTable(table, directory.getAbsolutePath() + "/" +myfilename, "csv");
+  myfilename = "SimonColors"+"-"+monthS +"-"+dayS+"-"+hourS+"-"+minuteS+".csv";
+  saveStrings(directory.getAbsolutePath() + "/" +myfilename, colorAssign);
   //println("exiting");
   super.exit();
 }
